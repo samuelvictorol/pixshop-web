@@ -1,0 +1,48 @@
+// app global css in SCSS form
+.low-opacity {
+    opacity: 0.7;
+}
+
+.w100 {
+    width: 100%;
+}
+
+body {
+    background: #4AC29A;  /* fallback for old browsers */
+    background: -webkit-linear-gradient(to top, #BDFFF3, #4AC29A);  /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(to top, #bdfff364, #4ac29a8c); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+}
+
+.modal {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: #0576e676;  /* fallback for old browsers */
+    background: -webkit-linear-gradient(to top, #0576e676, #02c5506e);  /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(to top, #0576e676, #02c5506e); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+    backdrop-filter: blur(4px);
+    z-index: 100;
+}
+
+.text-primary{
+    color: #30B6A8;
+}
+
+.text-primary-2{
+    color: #1eb4a5;
+}
+
+.w40 {
+    width: 40%;
+}
+
+.q-icon:hover {
+    cursor: pointer;
+    opacity: 0.7;
+    transition: 0.3s all ease-in-out;
+}
