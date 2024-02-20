@@ -7,8 +7,16 @@
                 <q-input @keyup.enter="fetchData" style="width:20%" outlined type="text" label="Nome do Produto" v-model="nome"/>
                 <q-input @keyup.enter="fetchData" style="width:10%" outlined prefix="R$" maxlength="8" mask="######,##" v-model="valorMax" reverse-fill-mask label="Valor Mínimo"/>
                 <q-input @keyup.enter="fetchData" style="width:10%" outlined prefix="R$" maxlength="8" mask="######,##" v-model="valorMin" reverse-fill-mask label="Valor Máximo"/>
-                <q-select @keyup.enter="fetchData" outlined v-model="promo" :options="options" label="Em promoção"/>
-                <q-select @keyup.enter="fetchData" outlined v-model="stock" :options="options" label="Em estoque"/>
+                <q-select @keyup.enter="fetchData" outlined v-model="promo" :options="options" label="Em promoção">
+                    <template v-slot:append>
+                        <q-icon name="close" @click.stop.prevent="promo = null" class="cursor-pointer" />
+                    </template>
+                </q-select>
+                <q-select @keyup.enter="fetchData" outlined v-model="stock" :options="options" label="Em estoque">
+                    <template v-slot:append>
+                        <q-icon name="close" @click.stop.prevent="stock = null" class="cursor-pointer" />
+                    </template>
+                </q-select>
             </div>
             <div class="row q-gutter-x-md q-mt-md   q-pb-sm">
                 <q-btn color="primary" icon="search" label="Consultar" @click="fetchData"/>
@@ -18,19 +26,21 @@
         </q-banner>
         <q-banner class="rounded-borders q-mt-lg q-py-md q-px-lg">
         <h5 class="text-primary-2">Resultado da Consulta</h5>
-        <q-table
-            table-header-class="bg-primary text-white"
-            class="q-my-lg "
+        <div class="border">
+            <q-table
+            table-header-class="bg-primary text-white "
+            class="q-mt-lg no-shadow "
             :rows="rows"
             :columns="columns"
-            row-key="name"
+            v-model:pagination="pagination"
             hide-pagination
+            row-key="field"
         >
         <template v-slot:body-cell-actions="props">
             <q-td :props="props">
                 <q-icon class="cursor-pointer" size="sm" color="yellow-9" name="edit" @click="editProduct(props.row.id)" />
                 <q-icon class="cursor-pointer" size="sm" color="green-5" name="add_shopping_cart" @click="addStock(props.row.id)" />
-                <q-icon class="cursor-pointer" size="sm" color="red-9" name="delete" @click="deleteProduct(props.row.id)" />
+                <q-icon class="cursor-pointer" size="sm" color="red-9" name="delete_forever" @click="deleteProduct(props.row.id)" />
             </q-td>
         </template>
         <template v-slot:body-cell-stock="props">
@@ -40,15 +50,17 @@
             </q-td>
         </template>
         </q-table>
+        </div>
+        <PaginationTable  @fetchData="fetchData" :pagination="pagination"/>
         </q-banner>
-    <AdminCreateProductModal v-if="adminCreateProductModal" @cancel="toggleAdminCreateProductModal"/>
+    <AdminCreateProductModal @fetchData="fetchData" v-if="adminCreateProductModal" @cancel="toggleAdminCreateProductModal"/>
     </div>
 </template>
 <script setup>
 import { api } from "src/boot/axios";
 import AdminCreateProductModal from "src/components/AdminCreateProductModal.vue";
+import PaginationTable from "src/components/PaginationTable.vue";
 import { onBeforeMount, ref } from "vue";
-
 const adminCreateProductModal = ref(false);
 
 const options = [
@@ -89,6 +101,14 @@ const replaceValor = (param) =>  {
 function toggleAdminCreateProductModal () {
     adminCreateProductModal.value = !adminCreateProductModal.value;
 }
+const pagination = ref({
+                    page: 1,
+                    isLastPage: null,
+                    rowsPerPage: 10,
+                    totalElements: null,
+                    totalPages: null
+                })
+
 
 const fetchData = async () => {
     try {
@@ -99,9 +119,17 @@ const fetchData = async () => {
                 valorMin: valorMin.value ? Number(replaceValor(valorMin.value)) : null,
                 emPromocao: promo.value ? promo.value.value : null,
                 stock: stock.value ? stock.value.value : null,
+                page: pagination.value.page,
+                rowsPerPage: pagination.value.rowsPerPage
             }
         });
-        rows.value = response.data;
+        console.log(JSON.stringify(response.data.pagination)); 
+        pagination.value.page = response.data.pagination.page;
+        pagination.value.isLastPage = response.data.pagination.isLastPage;
+        pagination.value.rowsPerPage = response.data.pagination.rowsPerPage;
+        pagination.value.totalElements = response.data.pagination.totalElements;
+        pagination.value.totalPages = response.data.pagination.totalPages
+        rows.value = response.data.products;
     } catch (error) {
         console.error('Erro ao buscar produtos:', error);
     }
@@ -133,6 +161,6 @@ h5{
     background-color: #c0d5d0;
 }
 .q-select {
-    width: 10%;
+    width: 15%;
 }
 </style>

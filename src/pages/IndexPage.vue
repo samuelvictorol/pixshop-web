@@ -1,9 +1,6 @@
 <template>
-  <q-page class="flex flex-center q-pb-xl">
-    <h6 class="w100 row no-wrap text-center">Pixshop 
-      <img class="q-ml-sm svg-pix" style="width:30px" src="https://www.svgrepo.com/show/500416/pix.svg" alt="pix">
-    </h6>
-    <div class="row q-pl-lg q-gutter-lg">
+  <q-page class="flex q-pb-xl">
+    <div class="row q-pl-lg q-pt-xl q-gutter-lg">
       <q-card class="my-card" v-for="product in products" :key="product._id">
         <img :src="product.imgProduct" alt="Product Image"  class="product-image">
         <q-card-section>
@@ -37,8 +34,10 @@ const products = ref([])
 onBeforeMount(async () => {
   await api.get('/products')
     .then(response => {
-      console.log(response.data)
-      products.value = response.data
+      // console.log(response.data)
+      products.value.push(...response.data.products) // ... operador de propagaçao array de objts[{}] 
+      products.value.push(...response.data.products) // ... operador de propagaçao array de objts[{}] 
+      products.value.push(...response.data.products) // ... operador de propagaçao array de objts[{}] 
     })
     .catch(error => {
       console.log(error)
@@ -48,6 +47,7 @@ onBeforeMount(async () => {
 <style scoped>
 .q-card {
   width: 320px;
+  height: 510px;
 }
 .q-card:hover {
   transition: all 0.15s linear;
@@ -61,8 +61,8 @@ onBeforeMount(async () => {
   display: block;
   margin: auto;
 }
-h6{
-  margin: 18px 22px;
+h6 {
+  margin: 0 0;
   padding: 0 0;
   font-size: 2.5rem;
   font-weight: 500;

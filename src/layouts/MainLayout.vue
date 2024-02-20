@@ -2,8 +2,6 @@
   <q-layout view="hHh lpR fFf">
     <q-header class="bg-primary text-white">
       <q-toolbar>
-        <q-btn dense flat round icon="menu" @click="toggleLeftDrawer" />
-
         <q-toolbar-title>
           <q-avatar>
             <img style="filter:invert(1)" src="https://www.svgrepo.com/show/500416/pix.svg">
@@ -15,21 +13,6 @@
       </q-toolbar>
     </q-header>
 
-    <q-drawer show-if-above v-model="leftDrawerOpen" side="left">
-      <q-list>
-        <div class="row justify-center q-my-md">
-          <q-btn label="Admin" icon="admin_panel_settings" color="warning" @click="navigate('/admin')"/>
-        </div>
-        <q-item v-for="(item, index) in leftDrawerItems" :key="index">
-          <q-item-section>
-            <q-item-label>{{ item.text }}</q-item-label>
-          </q-item-section>
-          <q-item-section side="right">
-            <q-icon :name="item.icon" />
-          </q-item-section>
-        </q-item>
-      </q-list>
-    </q-drawer>
 
     <q-drawer style="border-left: 2px solid #30b6a994;" show-if-above v-model="rightDrawerOpen" side="right">
       <h5 id="carrinho-title">Meu Carrinho</h5>
@@ -46,6 +29,9 @@
             <q-icon :name="item.icon" />
           </q-item-section>
         </q-item>
+        <div class="row justify-center q-my-md q-pb-lg">
+          <q-btn label="Admin" icon="admin_panel_settings" color="warning" @click="navigate('/admin')"/>
+        </div>
       </q-list>
     </q-drawer>
 
@@ -63,7 +49,6 @@ export default defineComponent({
   name: 'MainLayout',
 
   setup () {
-    const leftDrawerOpen = ref(false)
     const rightDrawerOpen = ref(false)
     const router = useRouter()
 
@@ -91,7 +76,6 @@ export default defineComponent({
 
     return {
       navigate,
-      leftDrawerOpen,
       rightDrawerOpen,
       leftDrawerItems,
       rightDrawerItems,

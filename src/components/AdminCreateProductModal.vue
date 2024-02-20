@@ -20,7 +20,7 @@
                 </q-card-section>
                 <q-card-actions class="q-pr-md"  align="right">
                     <q-btn class="text-primary" label="Cancelar" @click="$emit('cancel')"/>
-                    <q-btn color="primary" label="Salvar" @click="salvar()" :disabled="checkSave()"/>
+                    <q-btn color="primary" label="Salvar" @click="salvar();$emit('fetchData')" :disabled="checkSave()" />
                 </q-card-actions>
             </q-card>
             <img v-if="product.imgProduct != ''" class="animate__animated animate__fadeIn animate__slower" style="filter:drop-shadow(0px 0px 4px #00000044);width: 300px; object-fit: contain;" :src="product.imgProduct" alt="Imagem do produto preview">
@@ -29,7 +29,7 @@
 </template>
 <script setup>
 import { api } from "src/boot/axios";
-import { ref } from "vue";
+import { ref  } from "vue";
 import { useQuasar } from 'quasar';
 
 const $q = useQuasar();
@@ -104,7 +104,7 @@ function mostrarNotificacao(type, message) {
 
 const checkSave = () => {
         if(product.value.nomeProduto === '' || product.value.descricaoProduto === '' || product.value.valor === null || Number(replaceValor(product.value.valor)) == 0
-        || product.value.stock === nul || product.value.imgProduct === '') {
+        || product.value.stock === null || product.value.imgProduct === '') {
         return true;
     } else if (promo.value.value === true && valorPromocional.value === null || promo.value.value === true && Number(replaceValor(valorPromocional.value)) == 0  || 
                 promo.value.value === true &&(Number(replaceValor(valorPromocional.value)) >= Number(replaceValor(product.value.valor)))) {
