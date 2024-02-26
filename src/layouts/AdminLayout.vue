@@ -76,8 +76,8 @@ const valorMax = ref(null);
 const valorMin = ref(null);
 const columns = [
   { name: 'nomeProduto', label: 'Nome'.toUpperCase(), align: 'left', field: 'nomeProduto' },
-  { name: 'valor', label: 'Valor Máximo'.toUpperCase(), align: 'left', field: 'valor', format: (val) => val ? `R$ ${val.toFixed(2).replace('.', ',')}` : '-' },
-  { name: 'valorPromocional', label: 'Valor Promocional'.toUpperCase(), align: 'left', field: 'valorPromocional', format: (val) => val ? `R$ ${val.toFixed(2).replace('.', ',')}` : '-' },
+  { name: 'valor', label: 'Valor Máximo'.toUpperCase(), align: 'left', field: 'valor', format: (val) => val ? `R$ ${val}` : '-' },
+  { name: 'valorPromocional', label: 'Valor Promocional'.toUpperCase(), align: 'left', field: 'valorPromocional', format: (val) => val == '-' ? '-' : `R$ ${val}` },
   { name: 'stock', label: 'Estoque'.toUpperCase(), align: 'left', field: 'stock', format: (val) => val ? 'Disponível (' + val + ')' : 'Indisponível' },
   { name: 'actions', label: 'Ações'.toUpperCase(), align: 'right' }
 ];
@@ -114,7 +114,7 @@ const pagination = ref({
                 })
 
 
-const fetchData = async () => {
+                const fetchData = async () => {
     try {
         const response = await api.get('/products', {
             params: {
@@ -127,17 +127,24 @@ const fetchData = async () => {
                 rowsPerPage: pagination.value.rowsPerPage
             }
         });
-        // console.log(JSON.stringify(response.data.pagination)); 
+        // Mapear os dados e aplicar o formato aos valores
+        rows.value = response.data.products.map(product => ({
+            ...product,
+            valor: product.valor ? `${parseFloat(product.valor).toFixed(2).replace('.', ',')}` : '-',
+            valorPromocional: product.valorPromocional ? `${parseFloat(product.valorPromocional).toFixed(2).replace('.', ',')}` : '-'
+        }));
+
+        // Atualizar informações de paginação
         pagination.value.page = response.data.pagination.page;
         pagination.value.isLastPage = response.data.pagination.isLastPage;
         pagination.value.rowsPerPage = response.data.pagination.rowsPerPage;
         pagination.value.totalElements = response.data.pagination.totalElements;
-        pagination.value.totalPages = response.data.pagination.totalPages
-        rows.value = response.data.products;
+        pagination.value.totalPages = response.data.pagination.totalPages;
     } catch (error) {
         console.error('Erro ao buscar produtos:', error);
     }
 }
+
 
 function mostrarNotificacao(type, message) {
     $q.notify({
@@ -187,7 +194,6 @@ h5{
 .page {
     height: 100vh;
     width: 100vw;
-    background-color: #c0d5d0;
 }
 .q-select {
     width: 15%;

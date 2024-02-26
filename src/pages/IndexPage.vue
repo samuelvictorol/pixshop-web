@@ -13,39 +13,41 @@
           <p class="q-mt-xs">
             {{ product.descricaoProduto }}
           </p>
-        <q-btn
-          class="w100"
-          color="primary"
-          label="Adicionar ao Carrinho"
-          icon="add_shopping_cart"
-          @click="addCartItem(product._id)"/>
+          <q-btn
+            class="w100"
+            color="primary"
+            label="Adicionar ao Carrinho"
+            icon="add_shopping_cart"
+            @click="addCartItem(product)"/>
         </q-card-section>
-        </q-card>
+      </q-card>
     </div>
   </q-page>
 </template>
 
 <script setup>
+import { useCartStore } from '../stores/CartStore';
 import { api } from 'src/boot/axios';
 import { onBeforeMount, ref } from 'vue'
 
-const products = ref([])
+const cartStore = useCartStore();
+const products = ref([]);
 
 const addCartItem = (product) => {
-  localStorage.setItem('cart', JSON.stringify(product))
+  cartStore.addItem(product);
 }
 
 onBeforeMount(async () => {
   await api.get('/products')
     .then(response => {
-      // console.log(response.data)
-      products.value.push(...response.data.products)
+      products.value.push(...response.data.products);
     })
     .catch(error => {
-      console.log(error)
-    })
-})
+      console.log(error);
+    });
+});
 </script>
+
 <style scoped>
 .q-card {
   width: 320px;

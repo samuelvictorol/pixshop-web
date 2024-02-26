@@ -19,8 +19,8 @@
                     </div>
                 </q-card-section>
                 <q-card-actions class="q-pr-md"  align="right">
-                    <q-btn class="text-primary" label="Cancelar" @click="$emit('cancel')"/>
-                    <q-btn color="primary" :label="titleModalCreate == 'Adicionar' ? 'Salvar' : 'Editar'" @click="titleModalCreate == 'Adicionar' ? salvar() : editar();$emit('fetchData')" :disabled="checkSave()" />
+                    <q-btn id="btn-cancelar-modal-admin" class="text-primary" label="Cancelar" @click="$emit('cancel')"/>
+                    <q-btn color="primary" :label="titleModalCreate == 'Adicionar' ? 'Salvar' : 'Editar'" @click="titleModalCreate == 'Adicionar' ? salvar() : editar();" :disabled="checkSave()" />
                 </q-card-actions>
             </q-card>
             <img v-if="product.imgProduct != ''" class="animate__animated animate__fadeIn animate__slower" style="filter:drop-shadow(0px 0px 4px #00000044);width: 300px; object-fit: contain;" :src="product.imgProduct" alt="Imagem do produto preview">
@@ -54,7 +54,7 @@ const options = [
     { label: 'Não', value: false },
     { label: 'Sim', value: true }
 ];
-const promo = ref(options[0]); 
+const promo = ref(options[0]);
 
 const replaceValor = (param) => {
     if (typeof param != 'string') {
@@ -99,7 +99,8 @@ async function salvar() {
         product.value.stock = null
     } finally {
         success ? mostrarNotificacao('success', message) : mostrarNotificacao('error', message);
-        await emit('fetchData');
+        if(success) emit('fetchData')
+        closeModal()
     }
 }
 
@@ -108,6 +109,7 @@ async function editar(){
     let message = ''
     try {
         const object = {
+            _id: handleEdit.value._id,
             valor: Number(replaceValor(product.value.valor)),
             valorPromocional: promo.value.value == true ? Number(replaceValor(product.value.valorPromocional)) : null,
             nomeProduto: product.value.nomeProduto,
@@ -116,7 +118,7 @@ async function editar(){
             stock:  Number(product.value.stock),
             imgProduct: product.value.imgProduct
         }
-        const response = await api.put('/products/' + handleEdit.value.id, object);
+        const response = await api.put('/products/', object);
         message = response.data.message;
         success = true;
         limparModal();
@@ -126,9 +128,15 @@ async function editar(){
         product.value.stock = null
     } finally {
         success ? mostrarNotificacao('success', message) : mostrarNotificacao('error', message);
-        await emit('fetchData');
+        if(success) emit('fetchData')
+        closeModal()
     }
 
+}
+
+function closeModal() {
+  const btn = document.getElementById('btn-cancelar-modal-admin')
+  btn.click();
 }
 
 function mostrarNotificacao(type, message) {
@@ -145,21 +153,22 @@ const checkSave = () => {
         if(product.value.nomeProduto === '' || product.value.descricaoProduto === '' || product.value.valor === null || Number(replaceValor(product.value.valor)) == 0
         || product.value.stock === null || product.value.imgProduct === '') {
         return true;
-    } else if (promo.value.value === true && product.value.valorPromocional === null || promo.value.value === true && Number(replaceValor(product.value.valorPromocional)) == 0  || 
+    } else if (promo.value.value === true && product.value.valorPromocional === null || promo.value.value === true && Number(replaceValor(product.value.valorPromocional)) == 0  ||
                 promo.value.value === true &&(Number(replaceValor(product.value.valorPromocional)) >= Number(replaceValor(product.value.valor)))) {
                     return true;
-    }
+    } 
     return false
 }
 onBeforeMount(() => {
     if(props.editObject) {
         product.value = props.editObject;
-        // console.log(JSON.stringify(product.value))
         product.value.valor = replaceValor(props.editObject.valor);
         product.value.valorPromocional = product.value.valorPromocional ? replaceValor(props.editObject.valorPromocional) : null;
         handleEdit.value = product.value
-        if(props.editObject.valorPromocional) {
-            promo.value = options[1];
+        if(props.editObject.valorPromocional == '-') {
+            promo.value = options[0];
+        } else {
+          promo.value = options[1];
         }
     }
 })
