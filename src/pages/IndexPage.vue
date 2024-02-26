@@ -16,9 +16,9 @@
         <q-btn
           class="w100"
           color="primary"
-          label="Comprar"
-          icon="shopping_cart"
-          @click="() => $router.push({ name: 'product', params: { id: product._id } })"/>
+          label="Adicionar ao Carrinho"
+          icon="add_shopping_cart"
+          @click="addCartItem(product._id)"/>
         </q-card-section>
         </q-card>
     </div>
@@ -31,13 +31,15 @@ import { onBeforeMount, ref } from 'vue'
 
 const products = ref([])
 
+const addCartItem = (product) => {
+  localStorage.setItem('cart', JSON.stringify(product))
+}
+
 onBeforeMount(async () => {
   await api.get('/products')
     .then(response => {
       // console.log(response.data)
-      products.value.push(...response.data.products) // ... operador de propagaçao array de objts[{}] 
-      products.value.push(...response.data.products) // ... operador de propagaçao array de objts[{}] 
-      products.value.push(...response.data.products) // ... operador de propagaçao array de objts[{}] 
+      products.value.push(...response.data.products)
     })
     .catch(error => {
       console.log(error)

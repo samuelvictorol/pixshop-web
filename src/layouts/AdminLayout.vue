@@ -38,9 +38,8 @@
         >
         <template v-slot:body-cell-actions="props">
             <q-td :props="props">
-                <q-icon class="cursor-pointer" size="sm" color="yellow-9" name="edit" @click="editProduct(props.row.id)" />
-                <q-icon class="cursor-pointer" size="sm" color="green-5" name="add_shopping_cart" @click="addStock(props.row.id)" />
-                <q-icon class="cursor-pointer" size="sm" color="red-9" name="delete_forever" @click="deleteProduct(props.row.id)" />
+                <q-icon class="cursor-pointer" size="sm" color="yellow-9" name="edit" @click="editProduct(props.row._id)" />
+                <q-icon class="cursor-pointer" size="sm" color="red-9" name="delete_forever" @click="deleteProduct(props.row._id)" />
             </q-td>
         </template>
         <template v-slot:body-cell-stock="props">
@@ -51,9 +50,9 @@
         </template>
         </q-table>
         </div>
-        <PaginationTable  @fetchData="fetchData" :pagination="pagination"/>
+        <PaginationTable class="q-mb-md"  @fetchData="fetchData" :pagination="pagination"/>
         </q-banner>
-    <AdminCreateProductModal @fetchData="fetchData" v-if="adminCreateProductModal" @cancel="toggleAdminCreateProductModal"/>
+    <AdminCreateProductModal :editObject="editObject" :titleModalCreate="titleModalCreate" @fetchData="fetchData" v-if="adminCreateProductModal" @cancel="toggleAdminCreateProductModal"/>
     </div>
 </template>
 <script setup>
@@ -61,6 +60,9 @@ import { api } from "src/boot/axios";
 import AdminCreateProductModal from "src/components/AdminCreateProductModal.vue";
 import PaginationTable from "src/components/PaginationTable.vue";
 import { onBeforeMount, ref } from "vue";
+import { useQuasar } from 'quasar';
+const titleModalCreate = ref('Adicionar');
+const $q = useQuasar();
 const adminCreateProductModal = ref(false);
 
 const options = [
@@ -99,6 +101,8 @@ const replaceValor = (param) =>  {
 }
 
 function toggleAdminCreateProductModal () {
+    titleModalCreate.value = 'Adicionar';
+    editObject.value = null;
     adminCreateProductModal.value = !adminCreateProductModal.value;
 }
 const pagination = ref({
@@ -123,7 +127,7 @@ const fetchData = async () => {
                 rowsPerPage: pagination.value.rowsPerPage
             }
         });
-        console.log(JSON.stringify(response.data.pagination)); 
+        // console.log(JSON.stringify(response.data.pagination)); 
         pagination.value.page = response.data.pagination.page;
         pagination.value.isLastPage = response.data.pagination.isLastPage;
         pagination.value.rowsPerPage = response.data.pagination.rowsPerPage;
@@ -135,16 +139,41 @@ const fetchData = async () => {
     }
 }
 
+function mostrarNotificacao(type, message) {
+    $q.notify({
+        message: message,
+        position: 'top',
+        color: type === 'success' ? 'positive' : 'negative',
+        icon: type === 'success' ? 'delete_forever' : 'warning'
+    });
+}
+const editObject = ref(null);
+
 function editProduct(productId) {
-    // Lógica para editar o produto
+    toggleAdminCreateProductModal();
+    editObject.value = rows.value.find((product) => product._id === productId);
+    titleModalCreate.value = 'Editar';
 }
 
-function deleteProduct(productId) {
-    // Lógica para remover o produto
-}
-
-function addStock(productId) {
-    // Lógica para adicionar estoque ao produto
+async function deleteProduct(productId) {
+    if (window.confirm('Deseja realmente excluir este produto?')) {
+        try {
+            // Usando o ID do produto na URL da requisição DELETE
+            await api.delete(`/products/${productId}`)
+                .then((res) => {
+                    mostrarNotificacao('success', res.data.message);
+                    fetchData();
+                })
+                .catch((error) => {
+                    mostrarNotificacao('error', error.response.data.message);
+                });
+        } catch (error) {
+            console.error('Erro ao enviar requisição de exclusão:', error);
+            // Tratar erros caso ocorram
+        }
+    } else {
+        return;
+    }
 }
 
 onBeforeMount(fetchData)
