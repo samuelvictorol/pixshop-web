@@ -9,7 +9,10 @@ export const useCartStore = defineStore('cart', {
       return this.items.reduce((total, item) => total + item.quantidade, 0);
     },
     totalPrice() {
-      return this.items.reduce((total, item) => total + (item.valor * item.quantidade), 0);
+      const totalCalculate = (total, item) => {
+        return item.valorPromocional ? total + (item.valorPromocional * item.quantidade) : total + (item.valor * item.quantidade)
+      }
+      return this.items.reduce(totalCalculate, 0);
     },
   },
   actions: {
